@@ -30,3 +30,4 @@ serde_with = { version = "2.1.0", features = ["json"] }
 serde_urlencoded = "0.7"
 url = { version = "2.3.1", features = ["serde"] }
 percent-encoding = "2.2.0"
+trustchain-http = { git = "https://github.com/alan-turing-institute/trustchain.git", branch = "55-issuer-backend-traits-ssi-0.6.0"}

@@ -1,5 +1,5 @@
 [default.http]
-port = 3000
+port = 8081
 address = [127, 0, 0, 1]
 bodysizelimit = 2097152 # 2MiB
 

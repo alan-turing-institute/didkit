@@ -1,4 +1,4 @@
-use std::net::SocketAddr;
+use std::{net::SocketAddr, sync::Arc};
 
 use axum::{
     routing::{get, post},
@@ -14,6 +14,8 @@ use tracing::info;
 
 use crate::keys::KeyMap;
 
+use trustchain_http::{config::ServerConfig, resolver, state::AppState};
+
 mod config;
 mod credentials;
 mod error;
@@ -27,6 +29,11 @@ pub async fn healthcheck() {}
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
+
+    // Get config from CLI
+    let config: ServerConfig = ServerConfig::default();
+    // Create shared state
+    let shared_state = Arc::new(AppState::new(config));
 
     let pkg_name = env!("CARGO_PKG_NAME").replace('-', "_");
     let config: config::Config = Figment::new()
@@ -62,6 +69,15 @@ async fn main() {
         .route("/presentations/issue", post(presentations::issue))
         .route("/presentations/verify", post(presentations::verify))
         .route("/identifiers/:id", get(identifiers::resolve))
+        .route(
+            "/did/:id",
+            get(resolver::TrustchainHTTPHandler::get_did_resolution),
+        )
+        .route(
+            "/did/chain/:id",
+            get(resolver::TrustchainHTTPHandler::get_chain_resolution),
+        )
+        .with_state(shared_state)
         .layer(TraceLayer::new_for_http())
         .layer(RequestBodyLimitLayer::new(config.http.body_size_limit))
         .layer(
